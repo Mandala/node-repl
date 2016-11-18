@@ -1,0 +1,40 @@
+{
+  "name": "re-pl",
+  "version": "0.1.0",
+  "description": "The ultimate promise based general-purpose Read-Eval-Wait-Print Loop (REPL) console for Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "istanbul cover _mocha -- -u exports -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/withmandala/node-repl.git"
+  },
+  "keywords": [
+    "repl",
+    "promise",
+    "wait",
+    "console",
+    "debug",
+    "es6"
+  ],
+  "author": "Fadhli Dzil Ikram",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/withmandala/node-repl/issues"
+  },
+  "homepage": "https://github.com/withmandala/node-repl#readme",
+  "dependencies": {
+    "lodash": "^4.17.2",
+    "setlist": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.39",
+    "@types/node": "^6.0.48",
+    "coveralls": "^2.11.15",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.2",
+    "mocha-lcov-reporter": "^1.2.0",
+    "should": "^11.1.1"
+  }
+}
