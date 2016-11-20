@@ -1,5 +1,8 @@
 Node.js RE-PL Console
 ======================
+[![Build Status](https://travis-ci.org/withmandala/node-repl.svg?branch=master)](https://travis-ci.org/withmandala/node-repl)
+[![Coverage Status](https://coveralls.io/repos/github/withmandala/node-repl/badge.svg?branch=master)](https://coveralls.io/github/withmandala/node-repl?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/withmandala/node-repl/badge.svg)](https://snyk.io/test/github/withmandala/node-repl)
 
 This package will help you debug and halt asynchronous operations with included
 automatic promise and generator resolution, so no more hassle on writing
