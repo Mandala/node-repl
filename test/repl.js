@@ -107,6 +107,25 @@ describe('REPL input/output test', function() {
       return yield repl(($)=>eval($))(true);
     }).should.be.fulfilledWith(true);
   });
+  describe('Exit behavior on NODE_ENV=production', function() {
+    let exit = process.exit;
+    let nodeEnv = process.env.NODE_ENV;
+    // Override node env
+    before(function() {
+      process.env.NODE_ENV = 'production';
+    });
+    // Restore processes after test
+    after(function() {
+      process.env.NODE_ENV = nodeEnv;
+      process.exit = exit;
+    });
+    it('Should pass the test', function() {
+      return new Promise(function(resolve, reject) {
+        process.exit = resolve;
+        repl(($)=>eval($))().catch(reject);
+      }).should.fulfilledWith(-1);
+    });
+  });
 });
 
 describe('Worker functional test', function() {
