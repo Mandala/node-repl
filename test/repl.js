@@ -107,7 +107,7 @@ describe('REPL input/output test', function () {
       return yield repl(($)=>eval($))(true)
     }).should.be.fulfilledWith(true)
   })
-  describe('Exit behavior on NODE_ENV=production', function () {
+  describe('Exit behavior on production environment', function () {
     let exit = process.exit
     let nodeEnv = process.env.NODE_ENV
     // Override node env
@@ -119,11 +119,25 @@ describe('REPL input/output test', function () {
       process.env.NODE_ENV = nodeEnv
       process.exit = exit
     })
-    it('Should pass the test', function () {
+    it('Should exit on REPL execution', function () {
       return new Promise(function (resolve, reject) {
         process.exit = resolve
         repl(($)=>eval($))().catch(reject)
       }).should.fulfilledWith(-1)
+    })
+  })
+  describe('Exit behavior on .exit keyword', function () {
+    let exit = process.exit
+    // Restore processes after test
+    after(function () {
+      process.exit = exit
+    })
+    it('Should exit on keyword invoke', function () {
+      return new Promise(function (resolve, reject) {
+        process.exit = resolve
+        input.write('.exit\n')
+        repl(($)=>eval($))().catch(reject)
+      }).should.fulfilled()
     })
   })
 })
