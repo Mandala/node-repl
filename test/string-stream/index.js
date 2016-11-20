@@ -4,67 +4,67 @@
  * Copyright (c) 2016 Fadhli Dzil Ikram
  */
 
-const Writable = require('stream').Writable;
-const Readable = require('stream').Readable;
+const Writable = require('stream').Writable
+const Readable = require('stream').Readable
 
 class StringWritable extends Writable {
-  constructor(options) {
+  constructor (options) {
     // Set default encoding
-    options = options || {};
-    options.encoding = 'utf8';
+    options = options || {}
+    options.encoding = 'utf8'
     // Pass options to base class
-    super(options);
+    super(options)
     // Create simple string buffer
-    this._buffer = '';
+    this._buffer = ''
     // Add new listener handler
     this.on('newListener', function(event, listener) {
       if (event === 'data') {
         // Flush all data to receiver
-        listener(null, this.read());
+        listener(null, this.read())
       }
-    });
+    })
   }
 
   // Store chunk from internal buffer to string buffer
-  _write(chunk, encoding, callback) {
-    this._buffer += chunk.toString();
+  _write (chunk, encoding, callback) {
+    this._buffer += chunk.toString()
     if (this.emit('data', null, this._buffer)) {
       // Flush buffer if data event listened
-      this.flush();
+      this.flush()
     }
-    if (typeof callback === 'function') callback();
+    if (typeof callback === 'function') callback()
   }
 
-  flush() {
-    this._buffer = '';
+  flush () {
+    this._buffer = ''
   }
 
-  read() {
+  read () {
     // Copy string to temporary buffer
-    let buf = this._buffer;
+    let buf = this._buffer
     // Empty current buffer
-    this.flush();
+    this.flush()
     // Return copied buffer
-    return buf;
+    return buf
   }
 }
 
 class StringReadable extends Readable {
-  constructor(options) {
+  constructor (options) {
     // Set default encoding
-    options = options || {};
-    options.encoding = 'utf8';
+    options = options || {}
+    options.encoding = 'utf8'
     // Call parent constructor
-    super(options);
+    super(options)
   }
 
-  _read() {
+  _read () {
     
   }
 
-  write(string) {
+  write (string) {
     // Directly push input to internal buffer
-    this.push(string);
+    this.push(string)
   }
 }
 
