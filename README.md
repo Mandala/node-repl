@@ -26,6 +26,12 @@ production code.
 const repl = require('re-pl');
 ```
 
+> **Important Notice About `'use strict'` Directive**  
+> The `'use strict'` directive will **PREVENT** you from creating new variables
+> in the REPL console because of the inconsistent behavior of `eval()` function
+> in strict mode. The strict mode on the library does not affects the `eval()`
+> behavior of your application.
+
 ## Usage
 
 To start the REPL session, you shoud pass anonymous function containing eval

@@ -1,6 +1,6 @@
 {
   "name": "re-pl",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The ultimate promise based general-purpose Read-Eval-Wait-Print Loop (REPL) console for Node.js",
   "main": "index.js",
   "scripts": {
