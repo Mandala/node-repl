@@ -4,6 +4,8 @@
  * Copyright (c) 2016 Fadhli Dzil Ikram
  */
 
+'use strict'
+
 const Writable = require('stream').Writable
 const Readable = require('stream').Readable
 

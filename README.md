@@ -140,6 +140,26 @@ Hello, 4
 Same as `.done` keyword but instead of returning evaluated code, `.return`
 will return `$input` variable.
 
+## Disable Automatic Promise resolution
+
+If you intentionaly want to turn off the automatic promise resolution, pass
+`.disable` keyword into the REPL. You can re-enable them again with `.enable`
+keyword.
+
+```
+> .disable
+Automatic promise and generator resolution has been disabled
+
+> Promise.resolve(true)
+Promise { true }
+
+>.enable
+Automatic promise and generator resolution has been enabled
+
+> Promise.resolve(true)
+true
+```
+
 ## Usage with Generator Functions
 
 The debug function will return promises with held resolve so you can put them

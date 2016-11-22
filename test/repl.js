@@ -24,12 +24,12 @@ describe('REPL input/output test', function () {
   beforeEach(function () {
     input.read()
     output.removeAllListeners('data')
-    output.flush()
+    output.read()
   })
 
   // Kill the REPL by using done method
   afterEach(function () {
-    input.write('\n.done\n')
+    repl.stop()
   })
 
   it('Should display default welcome message', function () {
@@ -84,12 +84,19 @@ describe('REPL input/output test', function () {
     // Intentionally error'd output
     input.write('function a () {\n')
     // Get ... output/Error (node 4)
-    var nodeVer = parseInt(/^v([0-9])+/.exec(process.version)[1])
-    if (nodeVer < 6) {
+    if (getVersion() < 6) {
       return isMatch(/Error/).should.fulfilled()
     } else {
       return isMatch(/\.\.\./).should.fulfilled()
     }
+  })
+  it('Should .done without eval value', function () {
+    return run(function* () {
+      // Fill input
+      input.write('.done\n')
+      // Return the value
+      return yield repl(($)=>eval($))()
+    }).should.be.fulfilled()
   })
   it('Should .done with correct eval', function () {
     return run(function* () {
@@ -107,9 +114,9 @@ describe('REPL input/output test', function () {
       return yield repl(($)=>eval($))(true)
     }).should.be.fulfilledWith(true)
   })
-  describe('Exit behavior on NODE_ENV=production', function () {
-    let exit = process.exit
-    let nodeEnv = process.env.NODE_ENV
+  describe('Exit behavior on production environment', function () {
+    var exit = process.exit
+    var nodeEnv = process.env.NODE_ENV
     // Override node env
     before(function () {
       process.env.NODE_ENV = 'production'
@@ -119,11 +126,25 @@ describe('REPL input/output test', function () {
       process.env.NODE_ENV = nodeEnv
       process.exit = exit
     })
-    it('Should pass the test', function () {
+    it('Should exit on REPL execution', function () {
       return new Promise(function (resolve, reject) {
         process.exit = resolve
         repl(($)=>eval($))().catch(reject)
       }).should.fulfilledWith(-1)
+    })
+  })
+  describe('Exit behavior on .exit keyword', function () {
+    var exit = process.exit
+    // Restore processes after test
+    after(function () {
+      process.exit = exit
+    })
+    it('Should exit on keyword invoke', function () {
+      return new Promise(function (resolve, reject) {
+        process.exit = resolve
+        input.write('.exit\n')
+        repl(($)=>eval($))().catch(reject)
+      }).should.fulfilled()
     })
   })
 })
@@ -133,59 +154,104 @@ describe('Worker functional test', function () {
   beforeEach(function () {
     input.read()
     output.removeAllListeners('data')
-    output.flush()
+    output.read()
     repl(($)=>eval($))()
   })
 
   // Kill the REPL by using done method
   afterEach(function () {
-    input.write('\n.done\n')
+    repl.stop()
   })
 
   it('Should be able to declare variable', function () {
     return run(function* () {
-      return yield repl.worker('var x = true')
-    }).should.be.fulfilledWith(true)
+      var r = yield repl.worker('var x = true')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
   it('Should be able to declare and resolve promise', function () {
     return run(function* () {
-      return yield repl.worker('var x = Promise.resolve(true)')
-    }).should.be.fulfilledWith(true)
+      var r = yield repl.worker('var x = Promise.resolve(true)')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
   it('Should be able to assign variable', function () {
     return run(function* () {
       yield repl.worker('var x')
-      return yield repl.worker('x = true')
-    }).should.be.fulfilledWith(true)
+      var r = yield repl.worker('x = true')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
   it('Should be able to assign and resolve promise', function () {
     return run(function* () {
       yield repl.worker('var x')
-      return yield repl.worker('x = Promise.resolve(true)')
-    }).should.be.fulfilledWith(true)
+      var r = yield repl.worker('x = Promise.resolve(true)')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
   it('Should be able to return value', function () {
     return run(function* () {
-      return yield repl.worker('true')
-    }).should.be.fulfilledWith(true)
+      var r = yield repl.worker('true')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
   it('Should be able to return resolved promise', function () {
     return run(function* () {
-      return yield repl.worker('Promise.resolve(true)')
-    }).should.be.fulfilledWith(true)
+      var r = yield repl.worker('Promise.resolve(true)')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
-  it('Should be able to define class', function () {
+  it('Should be able to define class (Not working on Node 4)', function () {
+    // Skip test on NodeJS 4
+    if (getVersion() < 6) return
+    
     return run(function* () {
       yield repl.worker('class test {}')
-      return yield repl.worker('test.name')
-    }).should.be.fulfilledWith('test')
+      var r = yield repl.worker('test.name')
+      r.value.should.equal('test')
+    }).should.be.fulfilled()
+  })
+  it('Should writeback underscore on worker return', function () {
+    return run(function* () {
+      yield repl.worker('true')
+      var r = yield repl.worker('_')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
+  })
+  it('Should not writeback underscore when overriden', function () {
+    return run(function* () {
+      yield repl.worker('_ = true')
+      yield repl.worker('false')
+      var r = yield repl.worker('_')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
+  })
+  it('Should disable promise resolution on .disable', function() {
+    return run(function* () {
+      input.write('.disable\n')
+      var r = yield repl.worker('Promise.resolve(true)')
+      r.value.should.be.a.Promise()
+    }).should.be.fulfilled()
+  })
+  it('Should re-enable promise resolution on .enable', function() {
+    return run(function* () {
+      input.write('.disable\n')
+      input.write('.enable\n')
+      var r = yield repl.worker('Promise.resolve(true)')
+      r.value.should.equal(true)
+    }).should.be.fulfilled()
   })
 })
+
+// Get current node major version integer
+function getVersion() {
+  return parseInt(/^v([0-9])+/.exec(process.version)[1])
+}
 
 // Create regular expression hook to REPL output
 function isMatch(regexp) {
   return new Promise(function (resolve, reject) {
-    let timeout = setTimeout(
+    var timeout = setTimeout(
       ()=>reject(new Error('Regexp match not found')), 1000
     )
     output.on('data', function listener (err, data) {
