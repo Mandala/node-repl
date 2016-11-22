@@ -84,8 +84,7 @@ describe('REPL input/output test', function () {
     // Intentionally error'd output
     input.write('function a () {\n')
     // Get ... output/Error (node 4)
-    var nodeVer = parseInt(/^v([0-9])+/.exec(process.version)[1])
-    if (nodeVer < 6) {
+    if (getVersion() < 6) {
       return isMatch(/Error/).should.fulfilled()
     } else {
       return isMatch(/\.\.\./).should.fulfilled()
@@ -202,7 +201,10 @@ describe('Worker functional test', function () {
       r.value.should.equal(true)
     }).should.be.fulfilled()
   })
-  it('Should be able to define class', function () {
+  it('Should be able to define class (Not working on Node 4)', function () {
+    // Skip test on NodeJS 4
+    if (getVersion() < 6) return
+    
     return run(function* () {
       yield repl.worker('class test {}')
       var r = yield repl.worker('test.name')
@@ -240,6 +242,11 @@ describe('Worker functional test', function () {
     }).should.be.fulfilled()
   })
 })
+
+// Get current node major version integer
+function getVersion() {
+  return parseInt(/^v([0-9])+/.exec(process.version)[1])
+}
 
 // Create regular expression hook to REPL output
 function isMatch(regexp) {
