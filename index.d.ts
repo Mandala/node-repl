@@ -10,7 +10,11 @@ declare module 're-pl' {
     (input?: any): Promise<any>
   }
 
-  function repl ($eval: Function): Session
+  interface EvalFunction {
+    (ev: any): any
+  }
+
+  function repl ($eval: EvalFunction): Session
 
   export = repl
 }
